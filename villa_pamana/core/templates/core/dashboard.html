@@ -1,0 +1,180 @@
+<!--
+FILE: core/templates/core/dashboard.html
+
+This page contains overiview of all operations 
+at Villa Pamana Inn Management System.
+data comes from context in views
+-->
+
+{% extends 'core/base.html'%}
+
+{% block title%} Dashboard - Villa Pamana Inn {% endblock %}
+
+{% block content%}
+<div class ="card">
+    <h2>Dashboard Overview</h2>
+    <p>Welcome to Villa Pamana Inn Management System</p>
+    <p><strong>Today's Date:</strong>{{ today|date:"F d, Y"}}</p>
+</div>
+
+<!-- Financial Summary Card-->
+<div class="card"> 
+    <h2> Monthly Financial Summary</h2>
+    <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap:1rem ; margin-top: 1rem;">
+        <!-- Income Box-->
+         <div style="background-color: #d4edda; padding: 1.5rem; border-radius: 8px; text-align: center;">
+            <div style = "font-size: 0.9rem; color: #155724; margin-bottom: 0.5rem;"> Income</div>
+            <div style="font-size: 2rem; font-weight: bold; color: #155724;">
+                P{{ monthly_income|floatformat:2 }}
+            </div>
+        </div>
+
+        <!-- Expenses Box-->
+         <div style="background-color: #f8d7da; padding: 1.5rem; border-radius: 8px; text-align: center;">
+            <div style = "font-size: 0.9rem; color: #721c24; margin-bottom: 0.5rem;"> Expenses</div>
+            <div style="font-size: 2rem; font-weight: bold; color: #721c24;">
+                P{{ monthly_expenses|floatformat:2 }}
+            </div>
+        </div>
+
+        <!-- Profit Box-->
+         <div style="background-color: #cce5ff; padding: 1.5rem; border-radius: 8px; text-align: center;">
+            <div style = "font-size: 0.9rem; color: #004085; margin-bottom: 0.5rem;">Net Profit</div>
+            <div style="font-size: 2rem; font-weight: bold; color: #0c5460;">
+                P{{ monthly_profit|floatformat:2 }}
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Today's Task-->
+<div class = "card">
+    <h2> Today's Priority Tasks</h2>
+    {% if tasks %}
+    <table>
+        <thead>
+            <tr>
+                <th> Tasks </th>
+                <th> Priority </th>
+                <th> Due Date </th>
+                <th> Action </th>
+            </tr>
+        </thead>
+        <tbody>
+            {% for task in tasks %}
+            <tr>
+                <td>
+                    {{ task.title }}
+                    {% if task.description %}
+                    <br><small style="color: #666;"> {{ task.description|truncatewords:10}}</small>
+                    {% endif %}
+                </td>
+                <td>
+                    {% if task.priority == 'high' %}
+                        <span class="badge badge-danger"> High </span>
+                    {% elif task.priority == 'medium' %}
+                        <span class="badge badge-warning"> Medium</span>
+                    {% else %}
+                        <span class="badge badge-info"> Low </span>
+                    {% endif %}
+                </td>
+                <td>{{ task.due_date|date:"M d, Y"}}</td>
+                <td>
+                    <a href="{%url 'todo_list' %}" class="btn btn-primary btn-sm">View all</a>
+                </td>
+            </tr>
+            {% endfor %}
+        </tbody>
+    </table>
+    {% else %}
+    <p style ="color: #666; text-align: center; padding: 2rem;">No tasks for today! All Clear.</p>
+    {% endif %}
+</div>
+
+<!-- Restock Alerts-->
+<div class="card">
+    <h2> Inventory Restock Alert </h2>
+    {% if restock_alerts %}
+    <table>
+        <thead>
+            <tr>
+                <th> Item </th>
+                <th> Category </th>
+                <th> Current Stock</th>
+                <th> Minimum Stock</th>
+                <th> Action </th>
+            </tr>
+        </thead>
+        <tbody>
+            {% for item in restock_alerts %}
+            <tr style = "background-color: #fff3cd;">
+                <td><strong>{{item.name}}</strong></td>
+                <td>{{item.category}}</td>
+                <td>
+                    <span class="badge badge-danger">
+                        {{ item.quantity }} {{ item.unit }}
+                    </span>
+                </td>
+                <td>{{ item.minimum_stock }} {{ item.unit }}</td>
+                <td>
+                    <a href="{% url 'inventory_list' %}" class="btn btn-warning btn-sm">View Inventory</a>
+                </td>
+            </tr>
+            {% endfor %}
+        </tbody>
+    </table>
+    {% else %}
+    <p style ="color: #666; text-align: center; padding: 2rem;">All inventory levels are sufficient.</p>
+    {% endif %}
+</div>
+
+<!-- Today's Check-ins -->
+<div class="card">
+    <h2> Today's Check-ins</h2>
+    {% if todays_checkins %}
+    <table>
+        <thead>
+            <tr>
+                <th> Guest Name </th>
+                <th> Room </th>
+                <th> Number of Guests</th>
+                <th> Check-out Date </th>
+                <th> Payment Status </th>
+            </tr>
+        </thead>
+        <tbody>
+            {% for booking in todays_checkins %}
+            <tr>
+                <td> {{booking.guest_name}}</td>
+                <td> Room {{booking.room_number}}</td>
+                <td> {{booking.number_of_guests}}</td>
+                <td> {{booking.check_out|date:"M d, Y"}}</td>
+                <td>
+                    {% if booking.payment_status == 'paid' %}
+                        <span class="badge badge-success"> Paid </span>
+                    {% else %}
+                        <span class="badge badge-warning"> Pending </span>
+                    {% endif %}
+                </td>
+            </tr>
+            {% endfor %}
+        </tbody>
+    </table>
+    {% else %}
+    <p style ="color: #666; text-align: center; padding: 2rem;">No check-ins scheduled for today.</p>
+    {% endif %}
+</div>
+
+<!-- Quick Actions -->
+<div class ="card">
+    <h2> Quick Actions</h2>
+    <div style="display: flex; gap: 1rem; flex-wrap: wrap;">
+        <a href="{% url 'booking_add' %}" class ="btn btn-primary">New Bookings</a>
+        <a href="{% url 'inventory_add' %}" class ="btn btn-primary">Add Inventory Item</a>
+        <a href="{% url 'todo_add' %}" class ="btn btn-primary">Add To-Do Task</a>
+        <a href="{% url 'financial_add%}" class ="btn btn-primary">Record Financial Transaction</a>
+
+    </div>
+</div>
+
+{% endblock %}

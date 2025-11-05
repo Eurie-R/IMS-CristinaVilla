@@ -56,7 +56,7 @@ def dashboard(request):
     #prepare context
     context = {
         'tasks': tasks,
-        'restock_items': restock_items,
+        'restock_alerts': restock_items,
         'monthly_income': monthly_income,
         'monthly_expenses': monthly_expenses,
         'monthly_profit': monthly_profit,

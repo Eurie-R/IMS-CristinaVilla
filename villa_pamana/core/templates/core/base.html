@@ -1,0 +1,269 @@
+<!DOCTYPE html>
+<html lang="'en">
+    <head>
+        <meta charset="UTF-8">
+        <meta name="viewport" content="width-device-width, initial-scale=1.0">
+        <title>{% block title %} Villa Pamana Inn{%endblock%}</title>
+
+        <style>
+            /* Global styles */
+            *{
+                margin: 0;
+                padding: 0;
+                box-sizing: border-box;
+            }
+
+            body{
+                font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+                background-color: #f4f4f4;
+                color: #333;
+            }
+
+            /* NavBAR */
+            .navbar{
+                background-color: #2c3e50;
+                color: white;
+                padding: 1rem 2rem;
+                box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+            }
+
+            .navbar h1{
+                margin-bottom: 1rem;
+                font-size: 1.8rem;
+            }
+
+            .nav-links{
+                display: flex;
+                gap: 1rem;
+                list-style: none;
+                flex-wrap: wrap;
+            }
+
+            .nav-links a {
+                color: white;
+                text-decoration: none;
+                padding: 0.5rem 1rem;
+                border-radius: 4px;
+                transition: background-color 0.3s ease;
+            }
+
+            .nav-links a:hover {
+                background-color: #34495e;
+            }
+
+            .nav-links a.active {
+                background-color: #e74c3c;
+            }
+
+            /* Main Container */
+
+            .container{
+                max-width: 1200px;
+                margin: 2rem auto;
+                padding: 0 1rem;
+                background-color: white;
+                box-shadow: 0 2px 8px rgba(0,0,0,0.1);
+                border-radius: 8px;
+            }
+
+            /* MESSAGES (Success/Error Notifications) */
+
+            .messages{
+                list-style: none;
+                margin-bottom: 1rem;
+            }
+
+            .messages li{
+                padding: 1rem;
+                margin-bottom: 0.5rem;
+                border-radius: 4px;
+            }
+
+            .message.success{
+                background-color: #d4edda;
+                color: #155724;
+                border: 1px solid #c3e6cb;
+            }
+
+            .message.error{
+                background-color: #f8d7da;
+                color: #721c24;
+                border: 1px solid #f5c6cb;
+            }
+
+            /* Cards */
+            .card{
+                background: white;
+                border-radius: 8px;
+                padding: 1.5rem;
+                box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+                margin-bottom: 1.5rem;
+            }
+
+            .card h2{
+                margin-bottom: 1rem;
+                color: #2c3e50;
+                border-bottom: 2px solid #e74c3c;
+                padding-bottom: 0.5rem;
+            }
+
+            /* tables */
+            table{
+                width: 100%;
+                border-collapse: collapse;
+                margin-bottom: 1rem;
+            }
+
+            th, td{
+                padding: 0.75rem;
+                text-align: left;
+                border-bottom: 1px solid #ddd;
+            }
+
+            th{
+                background-color: #f4f4f4;
+                color: white;
+                font-weight: 600;
+            }
+
+            tr:hover{
+                background-color: #f5f5f5
+            }
+
+            /* Buttons */
+            .btn{
+                display: inline-block;
+                padding: 0.5rem 1rem;
+                border: none;
+                border-radius: 4px;
+                cursor: pointer;
+                background-color: #e74c3c;
+                color: white;
+                text-decoration: none;
+                font-size: 0.9rem;
+                transition: background-color 0.3s ease;
+            }
+
+            .btn:hover{
+                opacity: 0.8;
+            }
+
+            .btn-primary{
+                background-color: #3498db;
+                color: white;
+            }
+
+            .btn-success{
+                background-color: #2ecc71;
+                color: white;
+            }
+
+            .btn-danger{
+                background-color: #e74c3c;
+                color: white;
+            }
+
+            .btn-warning{
+                background-color: #f39c12;
+                color: white;
+            }
+
+            /* Forms */
+            .form-group{
+                margin-bottom: 1rem;
+            }
+
+            .form-group label{
+                display: block;
+                margin-bottom: 0.5rem;
+                font-weight: 600;
+                color: #2c3e50;
+            }
+
+            .form-group input,
+            .form-group select,
+            .form-group textarea{
+                width: 100%;
+                padding: 0.5rem;
+                border: 1px solid #ccc;
+                border-radius: 4px;
+                font-size: 1rem;
+            }
+
+            .form-group textarea{
+                resize: vertical;
+                min-height:100px
+            }
+
+            /* Badges */
+            .badge{
+                display: inline-block;
+                padding: 0.25rem 0.5rem;
+                border-radius: 12px;
+                font-size: 0.8rem;
+                color: white;
+                font-weight: 600;
+            }
+
+            .badge-success{
+                background-color: #2ecc71;
+                color: #155724
+            }
+            .badge-warning{
+                background-color: #f39c12;
+                color: #856404;
+            }
+            .badge-danger{
+                background-color: #e74c3c;
+                color: #721c24;
+            }
+            .badge-primary{
+                background-color: #3498db;
+                color: white;
+            }
+            .footer{
+                text-align: center;
+                padding: 2rem;
+                background-color: #2c3e50;
+                color: white;
+                margin-top: 3rem;
+            }
+        </style>
+        {% block extra_css %}{% endblock %}
+    </head>
+    <body>
+        <!-- NAVIGATION BAR-->
+         <nav class="navbar">
+            <h1>Villa Pamana Inn Management System</h1>
+            <ul class="nav-links">
+                <li><a href="{% url 'dashboard' %}">Dashboard</a></li>
+                <li><a href="{% url 'inventory_list' %}">Inventory</a></li>
+                <li><a href="{% url 'todo_list' %}">To-Do List</a></li>
+                <li><a href="{% url 'booking_list' %}">Bookings</a></li>
+                <li><a href="{% url 'financial_list' %}">Financials</a></li>
+            </ul>
+        </nav>
+
+        <!-- MAIN CONTENT AREA-->
+         <div class="container">
+            <!-- Display Django messages (success/error notifications)-->
+            {% if messages %}
+                <ul class="messages">
+                    {% for message in messages %}
+                        <li class="message {{ message.tags }}">{{ message }}</li>
+                    {% endfor %}
+                </ul>
+            {% endif %}
+
+            <!-- This is where child templates put their content-->
+            {% block content %}{% endblock %}
+        </div>
+
+        <!-- Footer -->
+        <footer class="footer">
+            <p>&copy; 2024 Villa Pamana Inn</p>
+        </footer>
+
+        {% block extra_js %}{% endblock %}
+    </body>
+</html>

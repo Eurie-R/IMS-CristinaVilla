@@ -1,0 +1,182 @@
+<!--
+FILE: core/templates/core/inventory.html
+
+This is the inventory management page - view and update stock
+
+-->
+
+{{% extends 'core/base.html' %}}
+
+{% block title %} Inventory Management{% endblock %}
+
+{% block content %}
+<div class="card">
+    <h2>Inventory Management</h2>
+
+    <!-- Button to toggle add form-->
+    <button onclick="toggleForm()" class="btn btn-primary" style="margin-bottom: 1rem;">
+        Add new Item
+    </button>
+
+    <!-- Add new item form (hidden by default)-->
+    <div id="addForm" style="display: none; background-color: #f9f9f9; padding: 1.5rem; border-radius: 8px; margin-bottom:1"> 
+        <h3> Add New Inventory Item</h3>
+        <form method="POST" action="{% url 'inventory_add' %}">
+            {% csrf_token %}
+
+            <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 1rem;">
+                <div class="form-group">
+                    <label>Item Name *</label>
+                    <input type="text" name="name" required>
+                </div>
+
+                <div class="form-group">
+                    <label>Category *</label>
+                    <select name="category" required>
+                        <option value="kitchen">Kitchen</option>
+                        <option value="housekeeping">Housekeeping</option>
+                        <option value="maintenance">Maintenance</option>
+                        <option value="other">Other</option>
+                    </select>
+
+                <div class="form-group">
+                    <label>Quantity *</label>
+                    <input type="number" name="quantity" required min="1">
+                </div>
+
+                <div class="form-group">
+                    <label>Minimum Stock Level *</label>
+                    <input type="number" name="minimum_stock" required min="1">
+                </div>
+
+                <div class="form-group">
+                    <label>Unit *</label>
+                    <input type="text" name="unit" required placeholder="e.g., pcs, kg, liters">
+                </div>
+            </div>
+
+            <button type="submit" class="btn btn-success"> Save Item</button>
+            <button type="button" onclick="toggleForm()" class="btn btn-danger">Cancel</button>
+        </form>
+    </div>
+</div>
+
+<!-- Inventory List -->
+<div class="card">
+    <h2> Current Inventory </h2>
+
+    {% if items %}
+    <table>
+        <thead>
+            <tr>
+                <th> Item name </th>
+                <th> Category </th>
+                <th> Current Stock </th>
+                <th> Minimum Stock </th>
+                <th> Status </th>
+                <th> Last Updated </th>
+                <th> Actions </th>
+            </tr>
+        </thead>
+        <tbody>
+            {% for item in items %}
+            <tr {% if item.needs_restock %} style="background-color: #fff3cd;" {% endif %}>
+                <td><strong>{{ item.name }}</strong></td>
+                <td> {{ item.category }}</td>
+                <td>
+                    <strong> {{item.quantity}}</strong> {{item.unit}}
+                </td>
+                <td> {{item.minimum_stock}} {{ item.unit }}</td>
+                <td>
+                    {% if item.needs_restock %}
+                        <span class="badge badge-danger">Needs Restock</span>
+                    {% else %}
+                        <span class="badge badge-success">Sufficient</span>
+                    {% endif %}
+                </td>
+                <td> {{ item.last_updated|date:"M d, Y H:i" }}</td>
+                <td>
+                    <!-- Quick Update buttons -->
+                    <button onlick="showUpdateModal({{ item.id }}, '{{item.name|escapejs}}', {{ item.quantity }})"
+                        class ="btn btn-primary btn-sm">
+                        Update Stock
+                    </button>
+                </td>
+            </tr>
+            {% endfor %}
+        </tbody>
+    </table>
+    {% else %}
+    <p style="text-align: center; padding: 2rem; color: #666">
+        No inventory items found. Please add new items to manage your stock.
+    </p>
+    {% endif %}
+</div>
+
+<!-- Update Modal (hidden by default)-->
+<div id="updateModal" style="display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%; background-color: rgba(0,0,0,0.5); z-index: 1000;">
+    <div style="background: white; width: 90%; max-width: 500px; margin: 5% auto; padding:2rem; border-radius: 8px;">
+        <h3 id="modalTitle"> Update Stock </h3>
+
+        <form id="updateForm" method="POST">
+            {% csrf_token %}
+
+            <div class="form-group">
+                <label>Action</label>
+                <select name="action" id="actionSelect" required>
+                    <option value="add">Add Stock</option>
+                    <option value="subtract">Deduct Stock</option>
+                </select>
+            </div>
+
+            <div class="form-group">
+                <label>Quantity</label>
+                <input type="number" name="amount" id="amountInput" required min="1">
+            </div>
+
+            <p> Current Stock: <strong id="currentStock"></strong></p>
+
+            <button type="submit" class="btn btn-success"> Save Changes</button>
+            <button type="button" onclick="closeUpdateModal()" class="btn btn-danger"> Cancel</button>
+        </form>
+    </div>
+</div>
+
+{% endblock %}
+
+
+{% block extra_js %}
+<script>
+//togle the add new item form 
+function toggleForm(){
+    var form = document.getElementById('addForm');
+    if(form.style.display ==='none'){
+        form.style.display = 'block';
+    } else {
+        form.style.display = 'none';
+    }
+}
+
+//Show the update modal
+function showUpdateModal(itemId, itemName, currentQuantity){
+    document.getElementById('modalTitle').textContent = 'Update: ' + itemName;
+    document.getElementById('currentStock').textContent = currentQuantity;
+    document.getElementById('updateForm').action = '/inventory/update/' + itemId + '/';
+    document.getElementById('updateModal').style.display = 'block';
+}
+
+//Close the update modal
+function closeUpdateModal(){
+    document.getElementById('updateModal').style.display = 'none';
+    document.getElementById('updateForm').reset();
+}
+
+window.onclick = function(event){
+    var modal = document.getElementById('updateModal');
+    if(event.target == modal){
+        closeUpdateModal();
+    }
+}
+</script>
+
+

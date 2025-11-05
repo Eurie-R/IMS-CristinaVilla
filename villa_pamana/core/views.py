@@ -220,3 +220,12 @@ def financial_add(request):
         messages.success(request, 'Financial transaction added successfully.')
         return redirect('financial_list')
     return redirect('financial_list')
+
+def financial_delete(request, pk):
+    if request.method== 'POST':
+        transaction = get_object_or_404(FinancialTransaction, pk=pk)
+        amount = transaction.amount
+        transaction.delete()
+
+        messages.success(request, f'Transaction of P{amount} deleted!')
+    return redirect('financial_list')

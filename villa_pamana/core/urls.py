@@ -24,5 +24,6 @@ urlpatterns = [
     #Financial Transactions
     path('financials/', views.financial_summary, name='financial_list'),
     path('financials/add/', views.financial_add, name='financial_add'),
+    path('financial/delete/<int:pk>/', views.financial_delete, name='financial_delete'),
 ]
 

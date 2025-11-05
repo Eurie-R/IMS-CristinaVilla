@@ -1,0 +1,278 @@
+<!-- 
+FILE: core/templates/core/bookings.html
+
+Digital logbook - guest reservations and checkins 
+
+Features 
+1. Add bookings
+2. Upcoming Bookings 
+3. Past bookings 
+4. Room availability status
+
+-->
+
+{% extends 'core/base.html' %}
+
+{% block title %} Booking Management {% endblock %}
+
+{% block content %}
+
+<!--Add new booking form-->
+<div class="card">
+    <h2> Booking Management</h2>
+
+    <div style="background-color: #f9f9f9; padding: 1.5rem; border-radius: 8px; margin-bottom: 1rem;">
+        <h3> New Booking</h3>
+        <form method="POST" action="{% url 'booking_add' %}">
+            {% csrf_token %}
+
+            <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 1rem;">
+                <div class="form-group">
+                    <label>Guest Name*</label>
+                    <input type="text" name="guest_name" required placeholder="e.g., John Doe">
+                </div>
+            </div>
+            <div class="form-group">
+                <label>Contact Number*</label>
+                <input type="tel" name="contact_number" required placeholder="e.g., +639171234567">
+            </div>
+            <!-- Room selection -->
+            <div class="form-group">
+                <label>Room Number*</label>
+                <select name="room_number" required>
+                    <option value="1">Room 1</option>
+                    <option value="2">Room 2</option>
+                    <option value="3">Room 3</option>
+                    <option value="4">Room 4</option>
+                </select>
+            </div>
+
+            <!-- Number of guests-->
+            <div class="form-group">
+                <label>Number of Guests *</label>
+                <input type="number" name="number_of_guests" required min="1">
+            </div>
+
+            <!--Check in-->
+            <div class="form-group">
+                <label> Check-in Date *</label>
+                <input type="date" name="check_in" required>
+            </div>
+
+            <!--Check out-->
+            <div class="form-group">
+                <label> Check-out Date *</label>
+                <input type="date" name="check_out" required>
+            </div>
+
+            <!--Payment Amount-->
+            <div class="form-group">
+                <label> Payment Amount *</label>
+                <input type="number" name="payment_amount" required min="0" step="0.01" placeholder="e.g., 1500.00">
+            </div>
+
+            <!--Payment Status-->
+            <div class="form-group">
+                <label> Payment Status *</label>
+                <select name="payment_status" required>
+                    <option value="paid"> Paid</option>
+                    <option value="pending"> Pending</option>
+                </select>
+            </div>
+            </div>
+
+        <!-- Submit Button-->
+        <button type="submit" class="btn btn-success" style="margin-top: 1rem;">
+             Add Booking
+        </button>
+        </form>
+    </div>
+</div>
+
+<!-- Upcoming bookings -->
+<div class="card">
+    <h2> Upcoming Bookings {{upcoming_bookings.count}}</h2>
+
+    {% if upcoming_bookings %}
+    <div style="overflow-x: auto;">
+        <table>
+            <thead>
+                <tr>
+                    <th> Guest Name </th>
+                    <th> Contact </th>
+                    <th> Room </th>
+                    <th> Guests </th>
+                    <th> Check-in </th>
+                    <th> Check-out </th>
+                    <th> Payment Amount </th>
+                    <th> Payment Status</th>
+                    <th> Actions </th>
+                </tr>
+            </thead>
+            <tbody>
+                <tr>
+                    <td>
+                        <strong>{{ booking.guest_name}}</strong>
+                    </td>
+
+                    <!-- Contact Column-->
+                    <td>
+                        <a href="tel:{{ booking.contact_number }}" style="color: #3498db">
+                            {{ booking.contact_number }}
+                        </a>
+                    </td>
+
+                    <!-- Room Column-->
+                    <td>
+                        <span class="badge badge-primary">
+                            Room {{ booking.room_number }}
+                        </span>
+                    </td>
+                    <!-- Number of guests -->
+                    <td>
+                        <span class="badge badge-primary">
+                            {{ booking.number_of_guests }} guests
+                        </span>
+                    </td>
+                    <!--Check in date-->
+                    <td>
+                        {{ booking.check_in|date:"M d, Y" }}
+
+                        {% if booking.check_in == today %}
+                            <span class="badge badge-success"> Today </span>
+                        {% endif %}
+                    </td>
+
+                    <!--Check out date-->
+                    <td>
+                        {{ booking.check_out|date:"M d, Y" }}
+                    </td>
+
+                    <!-- Duration -->
+                    <td>
+                        <strong> {{booking.duration}} </strong>
+                    </td>
+                    <!-- Payment Amount-->
+                     <td style="text-align: right;">
+                        <strong style="color: #27ae60;">
+                            ₱ {{ booking.payment_amount|floatformat:2 }}
+                        </strong>
+                     </td>
+                    <!-- Payment Status-->
+                    <td>
+                        {% if booking.payment_status == 'paid' %}
+                            <span class="badge badge-success"> Paid </span>
+                        {% else %}
+                            <span class="badge badge-warning"> Pending </span>
+                        {% endif %}
+                    </td>
+
+                    <!-- Actions Column -->
+                    <td>
+                        {% if booking.payment_status == 'pending' %}
+                            <form method="POST" action="{% url 'booking_mark_paid' booking.id %}" style="display: inline;">
+                                {% csrf_token %}
+                                <button type="submit" class="btn btn-success btn-sm"
+                                    onclick="return confirm('Mark this booking as paid?')">
+                                    Mark as Paid
+                                </button>
+                            </form>
+                        {% endif %}
+                    </td>
+                </tr>
+            </tbody>
+        </table>
+    </div>
+    {% else %}
+    <p style ="color: #666; text-align: center; padding: 2rem;">No upcoming bookings.</p>
+    {% endif %}
+</div>
+
+<!-- Past bookings -->
+<div class="card">
+    <h2> Booking History ({{ past_bookings.count}})</h2>
+
+    {% if past_bookings %}
+    <!-- Scrollable container for long history-->
+    <div style="max-height: 400px; overflow-y: auto;">
+        <table>
+            <thead style="position: sticky; top: 0; background-color: #2c3e50;">
+                <tr>
+                    <th>Date</th>
+                    <th>Guest Name</th>
+                    <th>Room</th>
+                    <th>Duration</th>
+                    <th>Amount</th>
+                    <th>Payment</th>
+                </tr>
+            </thead>
+            <tbody>
+                {% for booking in past_bookings %}
+                <!-- Faded apperance for past bookings-->
+                <tr style="opacity: 0.7;">
+                    <td>
+                        {{ booking.check_in|date:"M d, Y" }} - {{ booking.check_out|date:"M d, Y" }}
+                    </td>
+                    <td>
+                        {{ booking.guest_name }}
+                    </td>
+                    <td>
+                        Room {{ booking.room_number }}
+                    </td>
+                    <td>
+                        {{ booking.duration }} days
+                    </td>
+                    <td>
+                        ₱ {{ booking.payment_amount|floatformat:2 }}
+                    </td>
+                    <td>
+                        {% if booking.payment_status == 'paid' %}
+                            <span class="badge badge-success"> Paid </span>
+                        {% else %}
+                            <span class="badge badge-warning"> Pending </span>
+                        {% endif %}
+                    </td>
+                </tr>
+                {% endfor %}
+            </tbody>
+        </table>
+    </div>
+    {% else %}
+    <p style ="color: #666; text-align: center; padding: 2rem;">
+        No past bookings found.
+    </p>
+    {% endif %}
+</div>
+
+<!-- Room Availability -->
+<div class="card">
+    <h2> Quick Room Status </h2>
+
+    <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 1rem;">
+        <!-- Loop through room numbers 1-4-->
+        {% for room_number in "1234" %}
+        <div style="background-color: #e8f5e9; padding: 1.5rem; border-radius: 8px; text-align: center; border: 2px solid #4caf50;">
+            <div style="font-size: 2rem; margin-bottom: 0.5rem;">🏠</div>
+            <div style="font-size: 1.2rem; font-weight: bold; margin-bottom: 0.5rem;">
+                Room {{ room_number }}
+            </div>
+
+            {% with upcoming_bookings|length as total_upcoming %}
+            <div style="margin-top: 0.5rem; color: #2e7d32; font-weight: 600;">
+                {% if total_upcoming > 0 %}
+                    <span class="badge badge-danger"> Booked </span>
+                {% else %}
+                    <span class="badge badge-success"> Available </span>
+                {% endif %}
+            </div>
+            {% endwith %}
+        </div>
+        {% endfor %}
+    </div>
+
+    <p style="margin-top: 1rem; color: #666; font-size: 0.9rem">
+        * Room status is based on upcoming bookings only. Please refer to the booking list for detailed availability.
+    </p>
+</div>
+
+{% endblock %}

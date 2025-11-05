@@ -1,0 +1,79 @@
+<!-- 
+FILE: core/templates/core/financial.html
+Financital Tracking - income and expenses
+
+Features
+1. Financial Summary
+2. Add Transaction Form
+3. Transaction list
+4. Category Breakdown
+-->
+
+{% extends 'core/base.html' %}
+
+{% block title %} Financial Management {% endblock %}
+
+{% block content %}
+
+<!-- FInancial Summary cards-->
+<div class="card">
+    <h2> Financial Summary</h2>
+
+    <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(250px, 1fr)); gap: 1.5rem; margin-top: 1rem;">
+
+        <!--Total Income card-->
+        <div style="background: linear-gradient(135deg, #d4edda 0%, #c3e6cb 100%); padding: 2rem; border-radius: 12px; text-align: center; box-shadow: 0 4px 6px rgba(0,0,0,0,1)">
+            <div style="font-size: 1rem; color: #155724; margin-bottom: 0.5rem; font-weight: 600;">
+                Total income
+            </div>
+            <div style="font-size: 2.5rem; font-weight: bold; color: #155724;">
+                P{{ total_income|floatformat:2 }}
+            </div>
+            <div style="font-size: 0.85rem; color: #155724; margin-top: 0.5rem;">
+                All Time
+            </div>
+        </div>
+
+        <!-- Total Expenses card-->
+        <div style="background: linear-gradient(135deg, #f8d7da 0%, #f5c6cb 100%); padding: 2rem; border-radius: 12px; text-align: center; box-shadow: 0 4px 6px rgba(0,0,0,0,1)">
+            <div style="font-size: 1rem; color: #721c24; margin-bottom: 0.5rem; font-weight: 600;">
+                Total Expenses
+            </div>
+            <div style="font-size: 2.5rem; font-weight: bold; color: #721c24;">
+                P{{ total_expenses|floatformat:2 }}
+            </div>
+            <div style="font-size: 0.85rem; color: #721c24; margin-top: 0.5rem;">
+                All Time
+            </div>
+        </div>
+
+        <!-- Net Profit card-->
+        <div style="background: linear-gradient(135deg, #f8d7da 0%, #f5c6cb 100%); padding: 2rem; border-radius: 12px; text-align: center; box-shadow: 0 4px 6px rgba(0,0,0,0,1)">
+            <div style="font-size: 1rem; color: #004085; margin-bottom: 0.5rem; font-weight: 600;">
+                Net Profit
+            </div>
+            <div style="font-size: 2.5rem; font-weight: bold; color: {% if net_profit >= 0%}#004085 {% else %}#721c24 {% endif %};">
+                {% if net_profit >= 0%}
+                    P{{ net_profit|floatformat:2 }}
+                {% else %}
+                    -P{{ net_profit|floatformat:2|slice:"1:" }}
+                {% endif %}
+            </div>
+            <div style="font-size: 0.85rem; color: #004085; margin-top: 0.5rem;">
+                Income - Expenses
+            </div>
+        </div>
+    </div>
+</div>
+
+<!--Add transaction Form-->
+<div class="card">
+    <h2> Record New Transactions </h2>
+</div>
+
+
+
+
+
+
+{% endblock %}

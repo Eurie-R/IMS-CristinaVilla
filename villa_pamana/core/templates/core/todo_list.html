@@ -1,0 +1,168 @@
+<!--
+FILE: core/templates/core/todo.html
+Task Management - daily operations to-do list
+-->
+
+{% extends 'core/base.html'%}
+
+{% block title %} To-Do List Management {% endblock %}
+
+{% block content %}
+<div class ="card">
+    <h2> To-Do List </h2>
+
+    <!-- ADD Task Form-->
+     <div style="background-color: #f9f9f9; padding: 1.5rem; border-radius: 8px; margin-bottom: 1rem;">
+        <h3> Add New Task</h3>
+        <form method="POST" action="{% url 'todo_add' %}">
+            {% csrf_token %}
+
+            <div style="display: grid; grid-template-columns:2f 1fr 1fr; gap: 1rem;">
+                <div class="form-group">
+                    <label> Task Title *</label>
+                    <input type="text" name="title" required placeholder="e.g., Clean Room 3">
+                </div>
+
+                <div class="form-group">
+                    <label> Priority *</label>
+                    <select name="priority" required>
+                        <option value="low"> Low</option>
+                        <option value="medium"> Medium</option>
+                        <option value="high"> High</option>
+                    </select>
+                </div>
+
+                <div class="form-group">
+                    <label> Description (Optional)</label>
+                    <textarea name="description" rows="2" placeholder="Additional details..."></textarea>
+                </div>
+
+                <button type="submit" class="btn btn-success">Add Task</button>
+        </form>
+    </div>
+</div>
+
+<!-- Incomplete tasks -->
+<div class="card">
+    <h2> Pending Tasks {{ incomplete_tasks.count }}</h2>
+
+    {% if incomplete_tasks %}
+    <table>
+        <thead>
+            <tr>
+                <th style="width: 50px;"> Status </th>
+                <th> Task </th>
+                <th> Priority </th>
+                <th> Due Date </th>
+                <th> Action </th>
+            </tr>
+        </thead>
+        <tbody>
+            {% for task in incomplete_tasks %}
+            <tr>
+                <td>
+                    <form method="POST" action="{% url 'todo_toggle' task.id %}" style="margin: 0;">
+                        {% csrf_token %}
+                        <button type="submit" class="btn btn-success btn-sm" title="Mark as complete">
+                            &#10003;
+                        </button>
+                    </form>
+                </td>
+                <td>
+                    {{ task.title }}
+                    {% if task.description %}
+                    <br><small style="color: #666;"> {{ task.description|truncatewords:10}}</small>
+                    {% endif %}
+                </td>
+                <td>
+                    {% if task.priority == 'high' %}
+                        <span class="badge badge-danger"> High </span>
+                    {% elif task.priority == 'medium' %}
+                        <span class="badge badge-warning"> Medium</span>
+                    {% else %}
+                        <span class="badge badge-primary"> Low </span>
+                    {% endif %}
+                </td>
+                <td> 
+                    <form method="POST" action="{% url 'todo_delete' task.id %}" style="display: inline;">
+                        {% csrf_token %}
+                        <button type="submit" class="btn btn-danger btn-sm" 
+                            onclick="return confirm('Are you sure you want to delete this task?')">
+                            Delete
+                        </button>
+                    </form>
+                </td>
+            </tr>
+            {% endfor %}
+        </tbody>
+    </table>
+    {% else %}
+    <p style ="color: #666; text-align: center; padding: 2rem;">
+        No pending tasks! Great job.
+    </p>
+    {% endif %}
+</div>
+
+<!-- Completed tasks -->
+<div class="card">
+    <h2> Completed Tasks ({{ completed_tasks.count}})</h2>
+
+    {% if completed_tasks %}
+    <table>
+        <thead>
+            <tr>
+                <th style="width: 50px;"> Status </th>
+                <th> Task </th>
+                <th> Priority </th>
+                <th> Completed </th>
+                <th> Action </th>
+            </tr>
+        </thead>
+        <tbody>
+            {%for task in completed_tasks%}
+            <tr style="opacity: 0.7;">
+                <td>
+                    <form method="POST" action="{% url 'todo_toggle' task.id %}" style="margin: 0;">
+                        {% csrf_token %}
+                        <button type="submit" class="btn btn-success btn-sm" title="Mark as incomplete">
+                            &#10003;
+                        </button>
+                    </form>
+                </td>
+                <td>
+                    <s>{{ task.title}}</s>
+                    {% if task.description %}
+                    <br><small style="color: #666;"> <s>{{ task.description|truncatewords:10}}</s></small>
+                    {% endif %}
+                </td>
+                <td>
+                    {% if task.priority == 'high' %}
+                        <span class="badge badge-danger"> High </span>
+                    {% elif task.priority == 'medium' %}
+                        <span class="badge badge-warning"> Medium</span>
+                    {% else %}
+                        <span class="badge badge-primary"> Low </span>
+                    {% endif %}
+                </td>
+                <td>{{ task.completed_at|date:"M d, Y"}}</td>
+                <td> 
+                    <form method="POST" action="{% url 'todo_delete' task.id %}" style="display: inline;">
+                        {% csrf_token %}
+                        <button type="submit" class="btn btn-danger btn-sm" 
+                            onclick="return confirm('Are you sure you want to delete this task?')">
+                            Delete
+                        </button>
+                    </form>
+                </td>
+            </tr>
+            {% endfor %}
+        </tbody>
+    </table>
+    {% else %}
+    <p style ="color: #666; text-align: center; padding: 2rem;">
+        No completed tasks yet.
+    </p>
+    {% endif %}
+</div>
+
+{% endblock %}

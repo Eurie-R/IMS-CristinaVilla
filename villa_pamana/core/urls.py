@@ -1,7 +1,7 @@
 from django.urls import path
 from . import views
 
-urlpatters = [
+urlpatterns = [
     #Dashboard
     path('', views.dashboard, name='dashboard'),
 
@@ -13,7 +13,7 @@ urlpatters = [
     #To-Do Tasks
     path('todo/', views.todo_list, name='todo_list'),
     path('todo/add/', views.todo_add, name='todo_add'),
-    path('todo/toggle/<int:task_id>/', views.todo_toggle, name='todo_update'),
+    path('todo/toggle/<int:task_id>/', views.todo_toggle, name='todo_toggle'),
     path('todo/delete/<int:task_id>/', views.todo_delete, name='todo_delete'),
 
 
